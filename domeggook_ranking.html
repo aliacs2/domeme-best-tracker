@@ -178,9 +178,10 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
   <label>📅 날짜 선택</label>
   <select class="date-select" id="dateSelect" onchange="loadDateData(this.value)">
     <option value="20260424" selected>2026-04-24</option>
+<option value="20250419" >2025-04-19</option>
   </select>
   <span class="date-info" id="dateInfo"></span>
-  <span class="date-count" id="dateCount">1개 날짜 저장됨</span>
+  <span class="date-count" id="dateCount">2개 날짜 저장됨</span>
 </div>
 
 <div class="tab-bar">
@@ -693,7 +694,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
 // ══════════════════════════════════════════
 //  날짜별 데이터 관리
 // ══════════════════════════════════════════
-const AVAILABLE_DATES = ["20260424"];
+const AVAILABLE_DATES = ["20260424", "20250419"];
 const TODAY_STR = '20260424';
 
 // 현재 표시 중인 데이터 (초기값: 오늘 데이터)
