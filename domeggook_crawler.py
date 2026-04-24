@@ -176,7 +176,8 @@ def make_controls_html(cat_key):
       </tr></thead>
       <tbody id="body-{cat_key}"></tbody>
     </table>
-  </div>"""
+  </div>
+  <div class="card-list" id="cards-{cat_key}"></div>"""
 
 
 def save_html(all_data, available_dates, today_str, filename='domeggook_ranking.html'):
@@ -217,6 +218,7 @@ def save_html(all_data, available_dates, today_str, filename='domeggook_ranking.
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>도매꾹 인기 랭킹</title>
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -376,6 +378,91 @@ tr.hl-up  td:first-child {{ border-left: 3px solid #22c55e; }}
 }}
 @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
 .loading-text {{ font-size: 14px; color: #555; }}
+
+/* ── 카드 레이아웃 (모바일 전용) ── */
+.card-list {{ display: none; flex-direction: column; gap: 10px; }}
+.card {{
+  background: #fff; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  display: flex; gap: 0;
+}}
+.card.hl-new {{ border-left: 4px solid #f59e0b; background: #fffbeb; }}
+.card.hl-up  {{ border-left: 4px solid #22c55e; background: #f0fdf4; }}
+.card-img-wrap {{
+  flex-shrink: 0; width: 110px; position: relative;
+}}
+.card-img-wrap img {{
+  width: 110px; height: 110px; object-fit: cover; display: block;
+}}
+.card-img-wrap .card-rank {{
+  position: absolute; top: 6px; left: 6px;
+  background: rgba(0,0,0,.65); color: #fff;
+  font-size: 13px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; line-height: 1.4;
+}}
+.card-img-wrap .card-bm {{
+  position: absolute; top: 4px; right: 4px;
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; line-height: 1; padding: 2px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+}}
+.card-img-wrap .card-bm.on  {{ color: #f59e0b; }}
+.card-img-wrap .card-bm.off {{ color: rgba(255,255,255,.85); }}
+.card-body {{
+  flex: 1; padding: 10px 12px; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+}}
+.card-title {{
+  font-size: 13px; line-height: 1.5; color: #111;
+  text-decoration: none;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 8px;
+}}
+.card-title:hover {{ color: #4f46e5; }}
+.card-meta {{
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}}
+.card-price {{
+  font-size: 15px; font-weight: 700; color: #111;
+}}
+.card-change {{
+  font-size: 12px; font-weight: 700;
+}}
+.card-qty {{
+  font-size: 11px; color: #aaa;
+}}
+.card-tags {{
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px;
+}}
+
+/* ── 모바일 반응형 ── */
+@media (max-width: 640px) {{
+  body {{ padding: 12px 10px; }}
+  h1 {{ font-size: 17px; }}
+
+  /* 날짜바 */
+  .date-bar {{ padding: 10px 12px; gap: 8px; }}
+  .date-select {{ min-width: 0; flex: 1; font-size: 13px; }}
+  .date-count {{ display: none; }}
+
+  /* 탭 */
+  .tab-bar {{ gap: 3px; }}
+  .tab-btn {{ padding: 6px 10px; font-size: 11px; }}
+
+  /* 컨트롤 */
+  .controls {{ padding: 10px 12px; gap: 10px; }}
+  .ctrl-group input[type=text] {{ width: 100%; }}
+  .ctrl-group input[type=number] {{ width: 80px; }}
+
+  /* 테이블 숨기고 카드 표시 */
+  .table-wrap {{ display: none; }}
+  .card-list {{ display: flex; }}
+
+  /* 북마크 폴더바 */
+  .folder-bar {{ padding: 10px 12px; }}
+  .btn-bm-io {{ padding: 4px 8px; font-size: 11px; }}
+}}
 </style>
 </head>
 <body>
@@ -432,6 +519,7 @@ tr.hl-up  td:first-child {{ border-left: 3px solid #22c55e; }}
       <tbody id="bmBody"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-bm"></div>
 </div>
 
 <!-- 팝업 -->

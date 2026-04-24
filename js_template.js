@@ -401,6 +401,40 @@ function renderBmView() {
       <td class="col-qty"><span class="qty-val">최소 ${d.qty}개</span></td>
     </tr>`;
   }).join('');
+
+  // 카드 레이아웃 (모바일)
+  const cardList = document.getElementById('cards-bm');
+  if (cardList) {
+    cardList.innerHTML = list.map(({d, catKey, fid}) => {
+      const fname    = fmap[fid] || '';
+      const hl       = d.isNew ? 'hl-new' : d.isHotUp ? 'hl-up' : '';
+      const price    = d.priceNum > 0 ? d.priceNum.toLocaleString() + '원' : '-';
+      const chg      = chgHtml(d);
+      const biz      = d.biz === '사업자 전용' ? '<span class="badge-biz">사업자</span>' : '';
+      const newBadge = d.isNew ? '<span class="badge-new">NEW</span>' : '';
+      const catLabel = CATEGORIES.find(c=>c.key===catKey)?.label || '';
+      const idx      = DATA[catKey].indexOf(d);
+      const imgUrl   = d.img || '';
+      return `<div class="card ${hl}">
+        <div class="card-img-wrap">
+          ${imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span class="card-rank">${d.rank}위</span>
+          <button class="card-bm on" onclick="openPopup(event,'${catKey}',${idx})">★</button>
+        </div>
+        <div class="card-body">
+          <a href="${d.url}" target="_blank" class="card-title">${d.title}</a>
+          <div>
+            <div class="card-meta">
+              <span class="card-price">${price}</span>
+              <span class="card-change">${chg}</span>
+              <span class="card-qty">최소 ${d.qty}개</span>
+            </div>
+            <div class="card-tags">${newBadge}${biz}<span class="cat-tag">${catLabel}</span>${fname ? `<span class="bm-fname">${fname}</span>` : ''}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function updateBmBadge() {
@@ -555,6 +589,44 @@ function render(catKey) {
       <td class="col-qty"><span class="qty-val">최소 ${d.qty}개</span></td>
     </tr>`;
   }).join('');
+
+  // 카드 레이아웃 (모바일)
+  const cardList = document.getElementById(`cards-${catKey}`);
+  if (cardList) {
+    cardList.innerHTML = list.map(d => {
+      const idx      = DATA[catKey].indexOf(d);
+      const key      = itemKey(d);
+      const isMarked = !!bm[key];
+      const hl       = d.isNew ? 'hl-new' : d.isHotUp ? 'hl-up' : '';
+      const price    = d.priceNum > 0 ? d.priceNum.toLocaleString() + '원' : '-';
+      const chg      = chgHtml(d);
+      const biz      = d.biz === '사업자 전용' ? '<span class="badge-biz">사업자</span>' : '';
+      const catTag   = d.cat_label ? `<span class="cat-tag">${d.cat_label}</span>` : '';
+      const newBadge = d.isNew ? '<span class="badge-new">NEW</span>' : '';
+      const imgUrl   = d.img || '';
+      return `<div class="card ${hl}">
+        <div class="card-img-wrap">
+          ${imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span class="card-rank">${d.rank}위</span>
+          <button class="card-bm ${isMarked?'on':'off'}"
+            onclick="openPopup(event,'${catKey}',${idx})">
+            ${isMarked ? '★' : '☆'}
+          </button>
+        </div>
+        <div class="card-body">
+          <a href="${d.url}" target="_blank" class="card-title">${d.title}</a>
+          <div>
+            <div class="card-meta">
+              <span class="card-price">${price}</span>
+              <span class="card-change">${chg}</span>
+              <span class="card-qty">최소 ${d.qty}개</span>
+            </div>
+            <div class="card-tags">${newBadge}${biz}${catTag}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function renderCurrentTab() {
