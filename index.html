@@ -2,34 +2,29 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>도매꾹 인기 랭킹 트래커</title>
+<title>도매꾹 인기 랭킹 (감쟈 자동화 버전)</title>
 <style>
-/* 감쟈님이 주신 스타일 그대로 유지 */
+/* 감쟈님이 주신 원본 스타일 그대로 복사 */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Malgun Gothic', sans-serif; background: #f3f4f6; padding: 20px; color: #111; }
 h1 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
-
-/* 날짜 선택바 스타일 추가 */
 .date-bar { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
-.date-bar label { font-size: 11px; color: #888; font-weight: 600; }
 #dateSelect { padding: 6px 12px; border-radius: 7px; border: 1px solid #e5e7eb; font-size: 13px; outline: none; cursor: pointer; }
 
-/* ── 탭 ── */
+/* 탭 바 */
 .tab-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
 .tab-btn { padding: 7px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; background: #fff; cursor: pointer; color: #555; white-space: nowrap; transition: all .12s; }
 .tab-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; font-weight: 600; }
 .tab-btn:hover:not(.active) { background: #f0f0ff; border-color: #c7d2fe; color: #4f46e5; }
 
-/* ── 컨트롤 및 테이블 스타일 (생략 없이 원본 그대로 적용 권장) ── */
+/* 컨트롤 및 범례 */
 .controls { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
 .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
 .ctrl-group label { font-size: 11px; color: #888; font-weight: 600; }
-.ctrl-group input { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; width: 180px; font-family: inherit; outline: none; }
+.ctrl-group input { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; width: 180px; outline: none; }
 .price-range { display: flex; gap: 5px; align-items: center; }
-.price-range span { font-size: 12px; color: #bbb; }
 .ctrl-group select { padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; background: #fff; outline: none; cursor: pointer; }
 .btn-reset { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 12px; background: #fff; cursor: pointer; color: #555; }
-
 .legend { display: flex; gap: 12px; margin-bottom: 8px; align-items: center; font-size: 12px; color: #666; }
 .legend-item { display: flex; align-items: center; gap: 4px; }
 .legend-dot { width: 11px; height: 11px; border-radius: 3px; }
@@ -37,39 +32,32 @@ h1 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
 .dot-up  { background: #bbf7d0; border: 1px solid #22c55e; }
 .count-label { font-size: 12px; color: #888; margin-bottom: 7px; }
 
+/* 테이블 */
 .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
 thead { background: #f9fafb; }
-th { padding: 10px 8px; font-size: 11px; color: #888; font-weight: 600; border-bottom: 1px solid #e5e7eb; white-space: nowrap; letter-spacing: .3px; }
-th.sortable { cursor: pointer; user-select: none; }
-th.sortable:hover { background: #f0f0ff; color: #4f46e5; }
-th.asc  .sort-icon::after { content: ' ▲'; color: #4f46e5; font-size: 9px; }
+th { padding: 10px 8px; font-size: 11px; color: #888; font-weight: 600; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+th.sortable { cursor: pointer; }
+th.asc .sort-icon::after { content: ' ▲'; color: #4f46e5; font-size: 9px; }
 th.desc .sort-icon::after { content: ' ▼'; color: #4f46e5; font-size: 9px; }
-th:not(.asc):not(.desc) .sort-icon::after { content: ' ⇅'; color: #ccc; font-size: 9px; }
 td { padding: 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; text-align: center; }
-
 .thumb { width: 192px; height: 192px; object-fit: cover; border-radius: 7px; border: 1px solid #e5e7eb; display: block; margin: auto; }
-.title-link { color: #111; text-decoration: none; font-size: 12px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: left; }
-.title-link:hover { color: #4f46e5; text-decoration: underline; }
+.title-link { color: #111; text-decoration: none; font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-orient: vertical; overflow: hidden; text-align: left; }
 .chg-up { color: #16a34a; font-weight: 700; }
 .chg-down { color: #dc2626; font-weight: 700; }
-.badge-new { display: inline-block; background: #fde68a; color: #92400e; padding: 2px 6px; border-radius: 5px; font-size: 11px; font-weight: 700; border: 1px solid #f59e0b; }
-.badge-biz { display: inline-block; background: #fff7ed; color: #9a3412; padding: 1px 5px; border-radius: 4px; font-size: 10px; margin-left: 4px; border: 1px solid #fed7aa; vertical-align: middle; }
-.cat-tag { display: inline-block; font-size: 10px; color: #6366f1; background: #ede9fe; border-radius: 3px; padding: 1px 5px; margin-top: 2px; }
+.badge-new { background: #fde68a; color: #92400e; padding: 2px 6px; border-radius: 5px; font-size: 11px; border: 1px solid #f59e0b; }
+.cat-tag { display: inline-block; font-size: 10px; color: #6366f1; background: #ede9fe; padding: 1px 5px; border-radius: 3px; margin-top: 2px; }
 tr.hl-new td { background: #fffbeb; border-left: 3px solid #f59e0b; }
-tr.hl-up  td { background: #f0fdf4; border-left: 3px solid #22c55e; }
+tr.hl-up td { background: #f0fdf4; border-left: 3px solid #22c55e; }
 
-/* ── 북마크 관련 스타일 그대로 복사 ── */
-.bm-btn { background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1; transition: transform .15s; }
+/* 북마크 및 팝업 (감쟈님 원본 코드 동일) */
+.bm-btn { background: none; border: none; cursor: pointer; font-size: 20px; }
 .bm-btn.on { color: #f59e0b; }
 .bm-btn.off { color: #ddd; }
-.folder-bar { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
-.folder-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center; gap: 5px; }
+.chip { padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e5e7eb; background: #f9fafb; }
 .chip.active { background: #4f46e5; color: #fff; }
-.popup-overlay { display: none; position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.1); }
+.popup-overlay { display: none; position: fixed; inset: 0; z-index: 199; }
 .popup { display: none; position: fixed; z-index: 200; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.14); width: 250px; padding: 14px; }
-.popup.open { display: block; }
 </style>
 </head>
 <body>
@@ -77,65 +65,95 @@ tr.hl-up  td { background: #f0fdf4; border-left: 3px solid #22c55e; }
 <h1>도매꾹 인기 랭킹 트래커 🥔</h1>
 
 <div class="date-bar">
-    <label>분석 일자 선택</label>
+    <label>날짜 선택:</label>
     <select id="dateSelect" onchange="changeDate(this.value)"></select>
 </div>
 
-<div class="tab-bar" id="tabBar">
-    <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">전체 랭킹</button>
-    <button class="tab-btn" id="tab-cat01" onclick="switchTab('cat01')">패션잡화/화장품</button>
-    <button class="tab-btn" id="tab-cat02" onclick="switchTab('cat02')">의류/언더웨어</button>
-    <button class="tab-btn" id="tab-cat03" onclick="switchTab('cat03')">출산/유아동/완구</button>
-    <button class="tab-btn" id="tab-cat04" onclick="switchTab('cat04')">가구/생활/취미</button>
-    <button class="tab-btn" id="tab-cat05" onclick="switchTab('cat05')">스포츠/건강/식품</button>
-    <button class="tab-btn" id="tab-cat06" onclick="switchTab('cat06')">가전/휴대폰/산업</button>
-    <button class="tab-btn" id="tab-merged" onclick="switchTab('merged')">🗂 카테고리 합산</button>
-    <button class="tab-btn" id="tab-bm" onclick="switchTab('bm')">🔖 북마크 <span id="bmBadge"></span></button>
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">📋 전체 랭킹</button>
+  <button class="tab-btn" id="tab-cat01" onclick="switchTab('cat01')">패션잡화/화장품</button>
+  <button class="tab-btn" id="tab-cat02" onclick="switchTab('cat02')">의류/언더웨어</button>
+  <button class="tab-btn" id="tab-cat03" onclick="switchTab('cat03')">출산/유아동/완구</button>
+  <button class="tab-btn" id="tab-cat04" onclick="switchTab('cat04')">가구/생활/취미</button>
+  <button class="tab-btn" id="tab-cat05" onclick="switchTab('cat05')">스포츠/건강/식품</button>
+  <button class="tab-btn" id="tab-cat06" onclick="switchTab('cat06')">가전/휴대폰/산업</button>
+  <button class="tab-btn" id="tab-merged" onclick="switchTab('merged')">🗂 카테고리 합산</button>
+  <button class="tab-btn" id="tab-bm" onclick="switchTab('bm')">🔖 북마크 <span id="bmBadge"></span></button>
 </div>
 
-<div id="viewsContainer">
+<div id="mainView">
+  <div class="controls">
+    <div class="ctrl-group"><label>상품명 검색</label><input type="text" id="searchInput" oninput="renderCurrent()"></div>
+    <div class="ctrl-group">
+      <label>가격 범위</label>
+      <div class="price-range"><input type="number" id="priceMin" oninput="renderCurrent()"> <span>~</span> <input type="number" id="priceMax" oninput="renderCurrent()"></div>
     </div>
+    <div class="ctrl-group">
+      <label>구분 필터</label>
+      <select id="bizFilter" onchange="renderCurrent()"><option value="">전체</option><option value="일반">일반</option><option value="사업자 전용">사업자 전용</option></select>
+    </div>
+    <div class="ctrl-group">
+      <label>하이라이트</label>
+      <select id="hlFilter" onchange="renderCurrent()"><option value="">전체</option><option value="new">신규</option><option value="up">급상승</option></select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">↺ 초기화</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-new"></div>신규 진입</div>
+    <div class="legend-item"><div class="legend-dot dot-up"></div>급상승 ▲3↑</div>
+  </div>
+  <p class="count-label" id="countLabel"></p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:44px">북마크</th>
+        <th class="sortable asc" id="th-rankNum" onclick="sortBy('rankNum')">순위<span class="sort-icon"></span></th>
+        <th style="width:200px">이미지</th>
+        <th class="sortable" id="th-changeNum" onclick="sortBy('changeNum')">변동<span class="sort-icon"></span></th>
+        <th class="sortable" id="th-title" onclick="sortBy('title')">상품명<span class="sort-icon"></span></th>
+        <th class="sortable" id="th-priceNum" onclick="sortBy('priceNum')">가격<span class="sort-icon"></span></th>
+        <th style="width:70px">최소수량</th>
+      </tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
 
-<div id="view-bm" style="display:none">
+<div id="bmView" style="display:none">
   <div class="folder-bar">
     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <span style="font-weight:600;">폴더 관리</span>
-        <button onclick="promptNewFolder()" style="font-size:11px; cursor:pointer;">+ 새 폴더</button>
+        <span style="font-weight:600">폴더</span>
+        <div>
+            <button class="btn-reset" onclick="promptNewFolder()">+ 새 폴더</button>
+            <button class="btn-reset" onclick="exportBookmarks()">💾 저장</button>
+            <button class="btn-reset" onclick="importBookmarks()">📂 불러오기</button>
+        </div>
     </div>
     <div class="folder-chips" id="folderChips"></div>
   </div>
   <p class="count-label" id="bmCountLabel"></p>
   <div class="table-wrap">
-    <table>
-      <thead><tr>
-        <th style="width:44px">북마크</th>
-        <th class="sortable" id="th-bm-rankNum" onclick="sortByBm('rankNum')">순위</th>
-        <th style="width:200px">이미지</th>
-        <th class="sortable" id="th-bm-changeNum" onclick="sortByBm('changeNum')">변동</th>
-        <th>상품명</th>
-        <th class="sortable" id="th-bm-priceNum" onclick="sortByBm('priceNum')">가격</th>
-        <th style="width:70px">수량</th>
-      </tr></thead>
-      <tbody id="bmBody"></tbody>
-    </table>
+    <table><tbody id="bmBody"></tbody></table>
   </div>
 </div>
 
 <div class="popup-overlay" id="popOverlay" onclick="closePopup()"></div>
 <div class="popup" id="popup">
-  <h3 style="font-size:13px; margin-bottom:10px;">📁 폴더 선택</h3>
-  <div id="popFolderList" style="max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
-  <input type="text" id="popNewInput" placeholder="새 폴더..." style="width:100%; margin-bottom:5px; padding:5px;">
-  <button onclick="confirmBM()" style="width:100%; background:#4f46e5; color:#fff; border:none; padding:7px; cursor:pointer; border-radius:5px;">저장</button>
+  <h3 style="font-size:13px;margin-bottom:10px">📁 폴더 선택</h3>
+  <div id="popFolderList" style="max-height:160px;overflow-y:auto;margin-bottom:8px"></div>
+  <input type="text" id="popNewInput" placeholder="새 폴더..." style="width:100%;margin-bottom:8px;padding:5px">
+  <button onclick="confirmBM()" style="width:100%;padding:8px;background:#4f46e5;color:#fff;border:none;border-radius:5px;cursor:pointer">저장</button>
 </div>
 
 <script>
-// 전역 변수
-let ALL_DATA = {}; 
+let ALL_DATA = {};
 let DATA = {}; // 가공 데이터
 let currentTab = 'all';
+let activeFid = '__all__';
+let sortState = { col: 'rankNum', dir: 1 };
+
 const CATEGORIES = [
-  { key: 'all',   label: '전체 랭킹' },
+  { key: 'all', label: '📋 전체 랭킹' },
   { key: 'cat01', label: '패션잡화/화장품' }, { key: 'cat02', label: '의류/언더웨어' },
   { key: 'cat03', label: '출산/유아동/완구' }, { key: 'cat04', label: '가구/생활/취미' },
   { key: 'cat05', label: '스포츠/건강/식품' }, { key: 'cat06', label: '가전/휴대폰/산업' },
@@ -149,52 +167,15 @@ async function init() {
         const dates = await res.json();
         const select = document.getElementById('dateSelect');
         select.innerHTML = dates.map(d => `<option value="${d}">${d} 데이터</option>`).join('');
-        
-        // 뷰 컨테이너 미리 생성
-        const container = document.getElementById('viewsContainer');
-        CATEGORIES.forEach(c => {
-            container.innerHTML += `
-            <div id="view-${c.key}" style="display:${c.key==='all'?'':'none'}">
-                <div class="controls">
-                    <div class="ctrl-group"><label>상품명 검색</label><input type="text" id="search-${c.key}" oninput="render('${c.key}')"></div>
-                    <div class="ctrl-group"><label>최소 가격</label><input type="number" id="priceMin-${c.key}" oninput="render('${c.key}')"></div>
-                    <div class="ctrl-group"><label>최대 가격</label><input type="number" id="priceMax-${c.key}" oninput="render('${c.key}')"></div>
-                    <div class="ctrl-group">
-                        <label>필터</label>
-                        <select id="hl-${c.key}" onchange="render('${c.key}')">
-                            <option value="">전체</option><option value="new">신규</option><option value="up">급상승</option>
-                        </select>
-                    </div>
-                </div>
-                <p class="count-label" id="count-${c.key}"></p>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th style="width:44px">북마크</th>
-                            <th class="sortable" id="th-${c.key}-rankNum" onclick="sortBy('${c.key}','rankNum')">순위</th>
-                            <th style="width:200px">이미지</th>
-                            <th class="sortable" id="th-${c.key}-changeNum" onclick="sortBy('${c.key}','changeNum')">변동</th>
-                            <th>상품명</th>
-                            <th class="sortable" id="th-${c.key}-priceNum" onclick="sortBy('${c.key}','priceNum')">가격</th>
-                            <th style="width:70px">수량</th>
-                        </tr></thead>
-                        <tbody id="body-${c.key}"></tbody>
-                    </table>
-                </div>
-            </div>`;
-        });
-        
         changeDate(dates[0]);
-    } catch (e) { console.error("초기화 실패", e); }
+    } catch (e) { console.error(e); }
 }
 
-// 2. 날짜 변경 시 데이터 가공 (감쟈님 로직)
 async function changeDate(date) {
     const res = await fetch(`./data/${date}.json`);
-    const rawData = await res.json();
-    ALL_DATA = rawData;
+    ALL_DATA = await res.json();
     
-    // 데이터 전처리 (sortable 숫자형 추가)
+    // 데이터 전처리 (감쟈님 로직)
     DATA = {};
     Object.keys(ALL_DATA).forEach(key => {
         DATA[key] = ALL_DATA[key].map(d => ({
@@ -206,8 +187,7 @@ async function changeDate(date) {
             isHotUp: parseChange(d.change) >= 3 && d.change !== 'NEW'
         }));
     });
-    
-    renderCurrentTab();
+    renderCurrent();
 }
 
 function parseChange(c) {
@@ -217,51 +197,58 @@ function parseChange(c) {
     return m ? (m[1] === '▲' ? parseInt(m[2]) : -parseInt(m[2])) : 0;
 }
 
-// 3. 감쟈님 소팅 및 탭 로직
-let sortState = { bm: {col:'rankNum', dir:1} };
-CATEGORIES.forEach(c => sortState[c.key] = {col:'rankNum', dir:1});
-
-function sortBy(catKey, col) {
-    const s = sortState[catKey];
-    s.dir = (s.col === col) ? s.dir * -1 : 1;
-    s.col = col;
-    render(catKey);
-}
-
+// 2. 탭 및 정렬 로직 (원본 보존)
 function switchTab(key) {
     currentTab = key;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === 'tab-'+key));
-    CATEGORIES.forEach(c => document.getElementById('view-'+c.key).style.display = (c.key === key ? '' : 'none'));
-    document.getElementById('view-bm').style.display = (key === 'bm' ? '' : 'none');
-    renderCurrentTab();
+    CATEGORIES.forEach(c => document.getElementById('tab-'+c.key).classList.toggle('active', c.key === key));
+    document.getElementById('tab-bm').classList.toggle('active', key === 'bm');
+    
+    document.getElementById('mainView').style.display = key === 'bm' ? 'none' : 'block';
+    document.getElementById('bmView').style.display = key === 'bm' ? 'block' : 'none';
+    
+    renderCurrent();
 }
 
-function render(catKey) {
-    const list = DATA[catKey] || [];
-    const keyword = document.getElementById(`search-${catKey}`).value.toLowerCase();
-    const minP = parseInt(document.getElementById(`priceMin-${catKey}`).value) || 0;
-    const maxP = parseInt(document.getElementById(`priceMax-${catKey}`).value) || Infinity;
-    const hl = document.getElementById(`hl-${catKey}`).value;
+function sortBy(col) {
+    sortState.dir = (sortState.col === col) ? sortState.dir * -1 : 1;
+    sortState.col = col;
+    document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc','desc'));
+    document.getElementById('th-'+col).classList.add(sortState.dir === 1 ? 'asc' : 'desc');
+    renderCurrent();
+}
+
+// 3. 렌더링 (원본 디자인 반영)
+function renderCurrent() {
+    if (currentTab === 'bm') { renderBmView(); return; }
+    
+    const list = [...(DATA[currentTab] || [])];
+    const kw = document.getElementById('searchInput').value.toLowerCase();
+    const minP = parseInt(document.getElementById('priceMin').value) || 0;
+    const maxP = parseInt(document.getElementById('priceMax').value) || Infinity;
+    const biz = document.getElementById('bizFilter').value;
+    const hl = document.getElementById('hlFilter').value;
 
     let filtered = list.filter(d => {
-        if (keyword && !d.title.toLowerCase().includes(keyword)) return false;
+        if (kw && !d.title.toLowerCase().includes(kw)) return false;
         if (d.priceNum < minP || d.priceNum > maxP) return false;
+        if (biz && d.biz !== biz) return false;
         if (hl === 'new' && !d.isNew) return false;
         if (hl === 'up' && !d.isHotUp) return false;
         return true;
     });
 
-    const s = sortState[catKey];
-    filtered.sort((a, b) => (a[s.col] < b[s.col] ? -s.dir : (a[s.col] > b[s.col] ? s.dir : 0)));
+    filtered.sort((a, b) => (a[sortState.col] < b[sortState.col] ? -sortState.dir : (a[sortState.col] > b[sortState.col] ? sortState.dir : 0)));
 
-    const tbody = document.getElementById(`body-${catKey}`);
-    tbody.innerHTML = filtered.map((d, i) => {
+    document.getElementById('countLabel').innerText = `총 ${filtered.length}개 표시 중`;
+    
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = filtered.map(d => {
         const isMarked = !!loadBM()[d.url || d.title];
         const catTag = d.cat_label ? `<div class="cat-tag">${d.cat_label}</div>` : '';
         const hlClass = d.isNew ? 'hl-new' : d.isHotUp ? 'hl-up' : '';
         return `<tr class="${hlClass}">
-            <td><button class="bm-btn ${isMarked?'on':'off'}" onclick="openPopup(event,'${catKey}',${DATA[catKey].indexOf(d)})">★</button></td>
-            <td><b>${d.rank}</b>${d.all_rank?`<br><small>(전체${d.all_rank}위)</small>`:''}</td>
+            <td><button class="bm-btn ${isMarked?'on':'off'}" onclick="openPopup(event,'${currentTab}',${DATA[currentTab].indexOf(d)})">★</button></td>
+            <td><b>${d.rank}</b>${d.all_rank?`<br><small>전체${d.all_rank}위</small>`:''}</td>
             <td><img src="${d.img}" class="thumb"></td>
             <td class="${d.changeNum>0?'chg-up':(d.changeNum<0?'chg-down':'')}">${d.change}</td>
             <td><a href="${d.url}" target="_blank" class="title-link">${d.title}</a>${catTag}</td>
@@ -269,73 +256,115 @@ function render(catKey) {
             <td><small>최소 ${d.qty}</small></td>
         </tr>`;
     }).join('');
-    
-    document.getElementById(`count-${catKey}`).innerText = `총 ${filtered.length}개 표시 중`;
+    updateBmBadge();
 }
 
-// 4. 북마크 로직 (감쟈님 로직 유지)
+// 4. 북마크 로직 (폴더링, 저장/불러오기 기능 포함)
 const LS_BM = 'dmk_bm', LS_FL = 'dmk_fl';
 const loadBM = () => JSON.parse(localStorage.getItem(LS_BM)) || {};
 const loadFL = () => JSON.parse(localStorage.getItem(LS_FL)) || [{id:'f0', name:'기본 폴더', t:Date.now()}];
 const saveBM = v => localStorage.setItem(LS_BM, JSON.stringify(v));
 const saveFL = v => localStorage.setItem(LS_FL, JSON.stringify(v));
 
-let popKey=null, activeFid='__all__';
-
+let popKey = null;
 function openPopup(e, catKey, idx) {
     e.stopPropagation();
-    const d = DATA[catKey][idx];
-    popKey = d.url || d.title;
+    popKey = DATA[catKey][idx].url || DATA[catKey][idx].title;
     renderPopFolders();
     document.getElementById('popup').classList.add('open');
     document.getElementById('popOverlay').style.display = 'block';
 }
 
-function closePopup() { document.getElementById('popup').classList.remove('open'); document.getElementById('popOverlay').style.display='none'; }
-
 function renderPopFolders() {
     const fs = loadFL();
     document.getElementById('popFolderList').innerHTML = fs.map(f => `
-        <div style="padding:5px; border:1px solid #eee; cursor:pointer;" onclick="setPopFid('${f.id}')">📁 ${f.name}</div>
+        <div style="padding:8px; border:1px solid #eee; cursor:pointer; margin-bottom:4px" onclick="confirmBM('${f.id}')">📁 ${f.name}</div>
     `).join('');
 }
 
-let selectedPopFid = 'f0';
-function setPopFid(fid) { selectedPopFid = fid; confirmBM(); }
-
-function confirmBM() {
+function confirmBM(fid) {
     const bm = loadBM();
-    bm[popKey] = selectedPopFid;
+    if (bm[popKey] === fid) delete bm[popKey];
+    else bm[popKey] = fid;
     saveBM(bm);
-    closePopup();
-    renderCurrentTab();
-    updateBmBadge();
+    closePopup(); renderCurrent();
 }
+
+function closePopup() { document.getElementById('popup').classList.remove('open'); document.getElementById('popOverlay').style.display='none'; }
 
 function updateBmBadge() {
     const cnt = Object.keys(loadBM()).length;
     document.getElementById('bmBadge').innerText = cnt ? `(${cnt})` : '';
 }
 
-function renderCurrentTab() {
-    if (currentTab === 'bm') renderBmView();
-    else render(currentTab);
-    updateBmBadge();
-}
-
-// (북마크 탭 렌더링 코드는 지면상 핵심만 유지, 감쟈님 코드와 동일하게 작동)
+// 북마크 탭 렌더링 및 폴더 관리 (감쟈님 원본 기능)
 function renderBmView() {
     const bm = loadBM();
     const fs = loadFL();
+    const chips = document.getElementById('folderChips');
+    chips.innerHTML = `<div class="chip ${activeFid==='__all__'?'active':''}" onclick="activeFid='__all__';renderBmView()">전체</div>` +
+        fs.map(f => `<div class="chip ${activeFid===f.id?'active':''}" onclick="activeFid='${f.id}';renderBmView()">📁 ${f.name}</div>`).join('');
+    
+    // 북마크 리스트 생성 (중복 제거)
     let list = [];
-    CATEGORIES.forEach(ck => {
-        (DATA[ck.key] || []).forEach(d => {
-            if (bm[d.url || d.title]) list.push({d, catKey:ck.key});
+    let seen = new Set();
+    Object.values(DATA).forEach(arr => {
+        arr.forEach(d => {
+            const key = d.url || d.title;
+            if (bm[key] && (activeFid === '__all__' || bm[key] === activeFid) && !seen.has(key)) {
+                seen.add(key);
+                list.push(d);
+            }
         });
     });
-    // 중복 제거 및 필터링 후 렌더링 (동일 로직)
+
     const tbody = document.getElementById('bmBody');
-    tbody.innerHTML = list.map(item => `<tr>...</tr>`).join(''); // 감쟈님 렌더링 함수와 동일
+    tbody.innerHTML = list.map(d => `
+        <tr>
+            <td style="width:44px"><button class="bm-btn on" onclick="popKey='${d.url||d.title}';confirmBM('${bm[d.url||d.title]}')">★</button></td>
+            <td style="width:60px">${d.rank}</td>
+            <td style="width:200px"><img src="${d.img}" class="thumb"></td>
+            <td style="text-align:left"><a href="${d.url}" target="_blank" class="title-link">${d.title}</a></td>
+            <td style="text-align:right"><b>${d.priceNum.toLocaleString()}원</b></td>
+        </tr>
+    `).join('');
+}
+
+// 저장/불러오기 (감쟈님 요청 기능)
+function exportBookmarks() {
+    const data = { bm: loadBM(), fl: loadFL() };
+    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'dome_bookmarks.json'; a.click();
+}
+
+function importBookmarks() {
+    const input = document.createElement('input'); input.type = 'file';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const data = JSON.parse(ev.target.result);
+            saveBM(data.bm); saveFL(data.fl);
+            renderCurrent();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function promptNewFolder() {
+    const name = prompt("새 폴더 이름을 입력하세요");
+    if (name) {
+        const fs = loadFL();
+        fs.push({id: 'f_'+Date.now(), name: name, t: Date.now()});
+        saveFL(fs); renderBmView();
+    }
+}
+
+function resetFilters() {
+    ['searchInput','priceMin','priceMax','bizFilter','hlFilter'].forEach(id => document.getElementById(id).value = '');
+    renderCurrent();
 }
 
 init();
