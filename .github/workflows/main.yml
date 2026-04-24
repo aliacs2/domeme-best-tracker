@@ -2,14 +2,14 @@ name: Daily Dome Crawler
 
 on:
   schedule:
-    - cron: '15 15 * * *' # 한국 시간 자정 15분 (UTC 15:15)
-  workflow_dispatch: # 내가 원할 때 수동으로 실행하는 버튼 생성
+    - cron: '15 15 * * *' # 한국 자정 15분 (UTC 15:15)
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3 # 내 코드 가져오기
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -17,15 +17,17 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt # 도구 설치
+        run: |
+          pip install requests beautifulsoup4 pandas openpyxl
 
       - name: Run Crawler
-        run: python main.py # 크롤링 실행
+        run: python main.py 
 
       - name: Commit and Push
         run: |
           git config --global user.name "DomeBot"
           git config --global user.email "bot@github.com"
-          git add data/
+          # 강제로 모든 변경사항(data 폴더 포함)을 추가합니다.
+          git add . 
           git commit -m "Update daily data: $(date +'%Y-%m-%d')" || exit 0
           git push
