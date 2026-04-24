@@ -76,16 +76,18 @@ function getApiKey() { return localStorage.getItem(LS_API_KEY) || ''; }
 // ── 인메모리 북마크 상태 ──
 let _BM = {};   // { url: folderId }
 let _FL = [];   // [{ id, name, t }]
+let _serverReady = false;  // 서버 초기 로드 완료 전엔 sync 차단
 
 const loadBM = () => _BM;
 const loadFL = () => _FL;
-const saveBM = v => { _BM = v; syncToServer(); };
-const saveFL = v => { _FL = v; syncToServer(); };
+const saveBM = v => { _BM = v; if (_serverReady) syncToServer(); };
+const saveFL = v => { _FL = v; if (_serverReady) syncToServer(); };
 const itemKey = d => d.url || d.title;
 const latestFid = () => { if(!_FL.length) return null; return [..._FL].sort((a,b)=>b.t-a.t)[0].id; };
 
 function ensureDefaultFolder() {
-  if (!_FL.length) { _FL = [{id:'f0', name:'기본 폴더', t:Date.now()}]; syncToServer(); }
+  // 서버 연결 전이라면 sync 없이 메모리만 세팅
+  if (!_FL.length) { _FL = [{id:'f0', name:'기본 폴더', t:Date.now()}]; }
 }
 
 // ══════════════════════════════════════════
@@ -142,7 +144,8 @@ async function loadFromServer() {
     const data = await res.json();
     _BM = data.bookmarks || {};
     _FL = data.folders   || [];
-    ensureDefaultFolder();
+    if (!_FL.length) _FL = [{id:'f0', name:'기본 폴더', t:Date.now()}];
+    _serverReady = true;
     return true;
   } catch(e) {
     console.warn('북마크 불러오기 실패:', e);
@@ -788,6 +791,26 @@ function renderCurrentTab() {
 }
 
 // ── 초기화 ──
-ensureDefaultFolder();
+ensureDefaultFolder();  // sync 없이 메모리만 세팅
 switchTab('all');
 updateBmBadge();
+
+// 서버에서 북마크 초기 로드
+(async () => {
+  if (getApiUrl() && getApiKey()) {
+    const ok = await loadFromServer();  // 내부에서 _serverReady = true
+    if (ok) {
+      renderCurrentTab();
+      renderBmFolderBar();
+      updateBmBadge();
+      showToast(`✅ 북마크 ${Object.keys(_BM).length}개 불러옴`);
+    } else {
+      _serverReady = true;  // 실패해도 이후 수동 변경은 sync 허용
+      showToast('⚠️ 서버 연결 실패 — 설정을 확인하세요');
+    }
+  } else {
+    _serverReady = true;  // 서버 미설정 시 즉시 활성화
+    ensureDefaultFolder();
+  }
+  updateApiSettingsBtnState();
+})();
