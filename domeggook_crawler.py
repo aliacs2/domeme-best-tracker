@@ -155,6 +155,16 @@ def make_controls_html(cat_key):
         <option value="both">신규 + 급상승</option>
       </select>
     </div>
+    <div class="ctrl-group sort-ctrl">
+      <label>정렬 기준</label>
+      <select id="sort-{cat_key}" onchange="sortBySelect('{cat_key}', this.value)">
+        <option value="rankNum_1">순위 오름차순</option>
+        <option value="priceNum_1">가격 낮은순</option>
+        <option value="priceNum_-1">가격 높은순</option>
+        <option value="changeNum_-1">변동 상승순</option>
+        <option value="title_1">상품명 가나다순</option>
+      </select>
+    </div>
     <button class="btn-reset" onclick="resetAll('{cat_key}')">↺ 초기화</button>
   </div>
   <div class="legend">
@@ -436,6 +446,60 @@ tr.hl-up  td:first-child {{ border-left: 3px solid #22c55e; }}
   display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px;
 }}
 
+/* ── 다크모드 ── */
+body.dark {{ background: #111; color: #e5e7eb; }}
+body.dark .date-bar,
+body.dark .controls,
+body.dark .folder-bar,
+body.dark .table-wrap,
+body.dark .card {{ background: #1e1e2e; box-shadow: 0 1px 4px rgba(0,0,0,.4); }}
+body.dark .tab-btn {{ background: #1e1e2e; border-color: #374151; color: #9ca3af; }}
+body.dark .tab-btn.active {{ background: #4f46e5; color: #fff; border-color: #4f46e5; }}
+body.dark .tab-btn:hover:not(.active) {{ background: #2d2d3f; border-color: #6366f1; color: #a5b4fc; }}
+body.dark thead {{ background: #16162a; }}
+body.dark th {{ color: #6b7280; border-bottom-color: #374151; }}
+body.dark td {{ border-bottom-color: #1f2937; }}
+body.dark tbody tr:hover td {{ background: #1a1a2e !important; }}
+body.dark tr.hl-new td {{ background: #2d2510; }}
+body.dark tr.hl-up  td {{ background: #0f2a1a; }}
+body.dark tr.hl-new td:first-child {{ border-left-color: #f59e0b; }}
+body.dark tr.hl-up  td:first-child  {{ border-left-color: #22c55e; }}
+body.dark .card.hl-new {{ background: #2d2510; }}
+body.dark .card.hl-up  {{ background: #0f2a1a; }}
+body.dark .ctrl-group label {{ color: #6b7280; }}
+body.dark .ctrl-group input,
+body.dark .ctrl-group select,
+body.dark .btn-reset {{ background: #2d2d3f; border-color: #374151; color: #e5e7eb; }}
+body.dark .ctrl-group input::placeholder {{ color: #4b5563; }}
+body.dark .title-link,
+body.dark .card-title {{ color: #e5e7eb; }}
+body.dark .title-link:hover,
+body.dark .card-title:hover {{ color: #a5b4fc; }}
+body.dark .count-label,
+body.dark .legend {{ color: #6b7280; }}
+body.dark .chip {{ background: #2d2d3f; border-color: #374151; color: #9ca3af; }}
+body.dark .chip.active {{ background: #4f46e5; color: #fff; border-color: #4f46e5; }}
+body.dark .popup {{ background: #1e1e2e; border-color: #374151; }}
+body.dark .pf-row {{ border-color: #374151; color: #e5e7eb; }}
+body.dark .pf-row:hover {{ background: #2d2d3f; border-color: #6366f1; }}
+body.dark .popup-new input {{ background: #2d2d3f; border-color: #374151; color: #e5e7eb; }}
+body.dark .loading-overlay {{ background: rgba(17,17,17,0.9); }}
+body.dark .loading-text {{ color: #9ca3af; }}
+body.dark .date-badge {{ background: #2d2d3f; color: #a5b4fc; }}
+body.dark .card-price {{ color: #e5e7eb; }}
+body.dark .no-result {{ color: #4b5563; }}
+
+/* 다크모드 토글 버튼 */
+.dark-toggle {{
+  margin-left: auto; background: none; border: 1px solid #e5e7eb;
+  border-radius: 20px; padding: 4px 12px; font-size: 12px;
+  cursor: pointer; color: #555; font-family: inherit;
+  transition: all .15s; white-space: nowrap;
+}}
+.dark-toggle:hover {{ background: #f3f4f6; }}
+body.dark .dark-toggle {{ border-color: #374151; color: #9ca3af; background: #1e1e2e; }}
+body.dark .dark-toggle:hover {{ background: #2d2d3f; }}
+
 /* ── 모바일 반응형 ── */
 @media (max-width: 640px) {{
   body {{ padding: 12px 10px; }}
@@ -473,7 +537,10 @@ tr.hl-up  td:first-child {{ border-left: 3px solid #22c55e; }}
   <div class="loading-text">데이터 불러오는 중...</div>
 </div>
 
-<h1>도매꾹 인기 랭킹</h1>
+<div style="display:flex;align-items:center;margin-bottom:10px;">
+  <h1 style="margin-bottom:0;">도매꾹 인기 랭킹</h1>
+  <button class="dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 다크모드</button>
+</div>
 
 <!-- 날짜 선택 바 -->
 <div class="date-bar">
