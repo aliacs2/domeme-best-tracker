@@ -24,6 +24,27 @@ function parseChange(c) {
 const DATA = {};
 
 // ── rebuildData: ALL_DATA 변경 후 DATA 재구성 ──
+
+// ══════════════════════════════════════════
+//  다크모드
+// ══════════════════════════════════════════
+function toggleDark() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode', isDark ? '1' : '0');
+  document.getElementById('darkToggle').textContent = isDark ? '☀️ 라이트모드' : '🌙 다크모드';
+}
+
+(function() {
+  const saved = localStorage.getItem('darkMode');
+  if (saved === '1') {
+    document.body.classList.add('dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('darkToggle');
+      if (btn) btn.textContent = '☀️ 라이트모드';
+    });
+  }
+})();
+
 function rebuildData() {
   Object.keys(ALL_DATA).forEach(key => {
     DATA[key] = ALL_DATA[key].map(d => ({
@@ -497,6 +518,23 @@ function sortBy(catKey, col) {
   render(catKey);
 }
 
+
+function sortBySelect(catKey, val) {
+  const [col, dirStr] = val.split('_');
+  const dir = parseInt(dirStr);
+  const s = sortState[catKey];
+  s.col = col;
+  s.dir = dir;
+  // 테이블 헤더 클래스도 동기화
+  TH_KEYS.forEach(k => {
+    const el = document.getElementById(`th-${catKey}-${k}`);
+    if (!el) return;
+    el.classList.remove('asc','desc');
+    if (k === col) el.classList.add(dir===1?'asc':'desc');
+  });
+  render(catKey);
+}
+
 function resetAll(catKey) {
   ['search','priceMin','priceMax'].forEach(id => {
     const el = document.getElementById(`${id}-${catKey}`);
@@ -514,6 +552,8 @@ function resetAll(catKey) {
     if (k === 'rankNum') el.classList.add('asc');
   });
   render(catKey);
+  const sortSel = document.getElementById(`sort-${catKey}`);
+  if (sortSel) sortSel.value = 'rankNum_1';
 }
 
 function chgHtml(d) {
