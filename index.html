@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>감쟈의 도매꾹 트래킹 센터</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .controls { background: #fff; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; gap: 15px; align-items: center; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 15px; overflow: hidden; }
+        th, td { padding: 12px; border-bottom: 1px solid #edf2f7; text-align: center; }
+        th { background: #4a5568; color: white; font-size: 14px; }
+        .row-multi { background-color: #f0fff4; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 11px; margin-right: 3px; background: #ebf4ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .badge-best { background: #fff5f5; color: #c53030; border-color: #feb2b2; }
+        .thumb { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; }
+        select, input { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🥔 감쟈의 도매꾹 소싱 데이터 센터</h2>
+        <div class="controls">
+            <select id="dateSelect" onchange="loadData(this.value)">
+                <option>날짜 로딩 중...</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="상품명 검색..." oninput="render()">
+            <label><input type="checkbox" id="multiOnly" onchange="render()"> 중복 노출 상품만</label>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>소속 카테고리</th>
+                    <th>이미지</th>
+                    <th>상품명</th>
+                    <th>가격</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentData = [];
+
+        async function init() {
+            try {
+                const res = await fetch('data/index.json');
+                const dates = await res.json();
+                const select = document.getElementById('dateSelect');
+                select.innerHTML = dates.map(d => `<option value="${d}">${d} 데이터</option>`).join('');
+                loadData(dates[0]);
+            } catch (e) {
+                document.getElementById('dateSelect').innerHTML = "<option>데이터 없음</option>";
+            }
+        }
+
+        async function loadData(date) {
+            const res = await fetch(`data/${date}.json`);
+            currentData = await res.json();
+            render();
+        }
+
+        function render() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const multiOnly = document.getElementById('multiOnly').checked;
+
+            const filtered = currentData.filter(d => {
+                if (keyword && !d.title.toLowerCase().includes(keyword)) return false;
+                if (multiOnly && !d.is_multi_cat) return false;
+                return true;
+            });
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = filtered.map(d => `
+                <tr class="${d.is_multi_cat ? 'row-multi' : ''}">
+                    <td style="text-align:left;">${d.all_cats.map(c => `<span class="badge ${c==='전체 베스트'?'badge-best':''}">${c}</span>`).join('')}</td>
+                    <td><img src="${d.img}" class="thumb"></td>
+                    <td style="text-align:left;"><a href="${d.url}" target="_blank" style="text-decoration:none; color:#2d3748;">${d.title}</a></td>
+                    <td style="font-weight:bold;">${d.price.toLocaleString()}원</td>
+                    <td>${d.is_multi_cat ? '<b>🔥 중복</b>' : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        init();
+    </script>
+</body>
+</html>
