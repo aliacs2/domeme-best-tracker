@@ -26,6 +26,6 @@ jobs:
         run: |
           git config --global user.name "DomeBot"
           git config --global user.email "bot@github.com"
-          git add data/*.json data/index.json
+          git add data/
           git commit -m "Update daily data: $(date +'%Y-%m-%d')" || exit 0
           git push
