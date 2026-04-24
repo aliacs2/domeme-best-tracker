@@ -1,0 +1,64 @@
+name: 도매꾹 랭킹 크롤링
+
+on:
+  schedule:
+    # 매일 자정 12시 15분 KST = UTC 15:15
+    - cron: '15 15 * * *'
+  workflow_dispatch:  # 수동 실행 가능
+
+permissions:
+  contents: write  # 파일 커밋을 위해 필요
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 전체 히스토리 (날짜 데이터 보존)
+
+      - name: Python 3.11 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 의존성 설치
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: 랭킹 크롤링 실행
+        run: |
+          python domeggook_crawler.py
+
+      - name: 날짜 정보 확인
+        id: date_info
+        run: |
+          echo "TODAY=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "DATETIME=$(date +'%Y-%m-%d %H:%M KST')" >> $GITHUB_OUTPUT
+
+      - name: 변경사항 커밋 & 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 새 파일 추가
+          git add domeggook_ranking.html
+          git add data/ranking_${{ steps.date_info.outputs.TODAY }}.json
+          
+          # 변경사항이 있을 때만 커밋
+          if git diff --staged --quiet; then
+            echo "변경사항 없음 - 커밋 스킵"
+          else
+            git commit -m "🤖 랭킹 자동 업데이트: ${{ steps.date_info.outputs.DATETIME }}"
+            git push
+          fi
+
+      - name: 크롤링 완료 요약
+        run: |
+          echo "✅ 크롤링 완료: ${{ steps.date_info.outputs.DATETIME }}"
+          echo "📂 저장된 날짜 수: $(ls data/ranking_*.json 2>/dev/null | wc -l)"
+          ls -lh data/ranking_*.json 2>/dev/null | tail -5
