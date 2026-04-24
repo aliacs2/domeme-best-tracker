@@ -64,18 +64,131 @@ function rebuildData() {
 rebuildData();
 
 // ══════════════════════════════════════════
-//  localStorage 헬퍼
+//  API 설정 (시놀로지)
 // ══════════════════════════════════════════
-const LS_BM = 'dmk_bm', LS_FL = 'dmk_fl';
-const loadBM = () => { try { return JSON.parse(localStorage.getItem(LS_BM)) || {}; } catch(e){ return {}; } };
-const loadFL = () => { try { return JSON.parse(localStorage.getItem(LS_FL)) || []; } catch(e){ return []; } };
-const saveBM = v => localStorage.setItem(LS_BM, JSON.stringify(v));
-const saveFL = v => localStorage.setItem(LS_FL, JSON.stringify(v));
+const LS_DARK = 'darkMode';
+const LS_API_URL = 'dmk_api_url';
+const LS_API_KEY = 'dmk_api_key';
+
+function getApiUrl() { return localStorage.getItem(LS_API_URL) || ''; }
+function getApiKey() { return localStorage.getItem(LS_API_KEY) || ''; }
+
+// ── 인메모리 북마크 상태 ──
+let _BM = {};   // { url: folderId }
+let _FL = [];   // [{ id, name, t }]
+
+const loadBM = () => _BM;
+const loadFL = () => _FL;
+const saveBM = v => { _BM = v; syncToServer(); };
+const saveFL = v => { _FL = v; syncToServer(); };
 const itemKey = d => d.url || d.title;
-const latestFid = () => { const fs=loadFL(); if(!fs.length)return null; return [...fs].sort((a,b)=>b.t-a.t)[0].id; };
+const latestFid = () => { if(!_FL.length) return null; return [..._FL].sort((a,b)=>b.t-a.t)[0].id; };
 
 function ensureDefaultFolder() {
-  if (!loadFL().length) saveFL([{id:'f0', name:'기본 폴더', t:Date.now()}]);
+  if (!_FL.length) { _FL = [{id:'f0', name:'기본 폴더', t:Date.now()}]; syncToServer(); }
+}
+
+// ══════════════════════════════════════════
+//  서버 동기화
+// ══════════════════════════════════════════
+let _syncTimer = null;
+
+// 저장 (디바운스 500ms)
+function syncToServer() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(_doSync, 500);
+}
+
+async function _doSync() {
+  const url = getApiUrl();
+  const key = getApiKey();
+  if (!url || !key) return;
+
+  const seen = new Set();
+  const items = [];
+  Object.keys(DATA).forEach(catKey => {
+    (DATA[catKey] || []).forEach(d => {
+      const k = itemKey(d);
+      if (!_BM[k] || seen.has(k)) return;
+      seen.add(k);
+      const folder = _FL.find(f => f.id === _BM[k]);
+      items.push({
+        folder_id: _BM[k], folder_name: folder ? folder.name : '(삭제된 폴더)',
+        rank: d.rank, change: d.change, title: d.title, price: d.price,
+        qty: d.qty, biz: d.biz, url: d.url, img: d.img,
+        category: CATEGORIES.find(c=>c.key===catKey)?.label || catKey,
+      });
+    });
+  });
+
+  const payload = { version: 1, folders: _FL, bookmarks: _BM, items };
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Secret-Key': key },
+      body: JSON.stringify(payload),
+    });
+  } catch(e) { console.warn('북마크 동기화 실패:', e); }
+}
+
+// 불러오기
+async function loadFromServer() {
+  const url = getApiUrl();
+  const key = getApiKey();
+  if (!url || !key) return false;
+  try {
+    const res = await fetch(url, { headers: { 'X-Secret-Key': key } });
+    if (!res.ok) return false;
+    const data = await res.json();
+    _BM = data.bookmarks || {};
+    _FL = data.folders   || [];
+    ensureDefaultFolder();
+    return true;
+  } catch(e) {
+    console.warn('북마크 불러오기 실패:', e);
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════
+//  API 설정 UI
+// ══════════════════════════════════════════
+function openApiSettings() {
+  const url = getApiUrl();
+  const key = getApiKey();
+  const modal = document.getElementById('apiModal');
+  document.getElementById('apiUrlInput').value = url;
+  document.getElementById('apiKeyInput').value = key;
+  modal.style.display = 'flex';
+}
+
+function closeApiSettings() {
+  document.getElementById('apiModal').style.display = 'none';
+}
+
+function updateApiSettingsBtnState() {
+  const btn = document.getElementById('apiSettingsBtn');
+  if (!btn) return;
+  const connected = !!(getApiUrl() && getApiKey());
+  btn.classList.toggle('connected', connected);
+  btn.textContent = connected ? '🔗 서버 연결됨' : '🔗 서버 설정';
+}
+
+async function saveApiSettings() {
+  const url = document.getElementById('apiUrlInput').value.trim();
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!url || !key) { alert('URL과 키를 모두 입력하세요.'); return; }
+  localStorage.setItem(LS_API_URL, url);
+  localStorage.setItem(LS_API_KEY, key);
+  closeApiSettings();
+  showToast('⏳ 서버에서 북마크 불러오는 중...');
+  const ok = await loadFromServer();
+  if (ok) {
+    renderCurrentTab(); renderBmFolderBar(); updateBmBadge();
+    showToast(`✅ 연결 성공 — 북마크 ${Object.keys(_BM).length}개 불러옴`);
+  } else {
+    showToast('❌ 연결 실패 — URL과 키를 확인하세요');
+  }
 }
 
 // ══════════════════════════════════════════

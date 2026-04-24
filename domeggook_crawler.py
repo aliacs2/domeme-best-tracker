@@ -343,6 +343,10 @@ tr.hl-up  td:first-child {{ border-left: 3px solid #22c55e; }}
 .btn-export:hover {{ background: #dcfce7; border-color: #86efac; }}
 .btn-import {{ background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }}
 .btn-import:hover {{ background: #dbeafe; border-color: #93c5fd; }}
+.btn-api {{ background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }}
+.btn-api:hover {{ background: #dcfce7; border-color: #86efac; }}
+.btn-api.connected {{ background: #4f46e5; color: #fff; border-color: #4338ca; }}
+.btn-api.connected:hover {{ background: #4338ca; }}
 .folder-chips {{ display: flex; flex-wrap: wrap; gap: 6px; }}
 .chip {{ display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e5e7eb; background: #f9fafb; color: #555; user-select: none; }}
 .chip.active {{ background: #4f46e5; color: #fff; border-color: #4f46e5; }}
@@ -484,6 +488,9 @@ body.dark .pf-row {{ border-color: #374151; color: #e5e7eb; }}
 body.dark .pf-row:hover {{ background: #2d2d3f; border-color: #6366f1; }}
 body.dark .popup-new input {{ background: #2d2d3f; border-color: #374151; color: #e5e7eb; }}
 body.dark .loading-overlay {{ background: rgba(17,17,17,0.9); }}
+body.dark #apiModal > div {{ background: #1e1e2e; }}
+body.dark #apiModal h3 {{ color: #e5e7eb; }}
+body.dark #apiModal input {{ background: #2d2d3f; border-color: #374151; color: #e5e7eb; }}
 body.dark .loading-text {{ color: #9ca3af; }}
 body.dark .date-badge {{ background: #2d2d3f; color: #a5b4fc; }}
 body.dark .card-price {{ color: #e5e7eb; }}
@@ -567,6 +574,7 @@ body.dark .dark-toggle:hover {{ background: #2d2d3f; }}
         <button class="btn-new-folder" onclick="promptNewFolder()">+ 새 폴더</button>
         <button class="btn-bm-io btn-export" onclick="exportBookmarks()" title="북마크를 JSON 파일로 저장">💾 저장</button>
         <button class="btn-bm-io btn-import" onclick="importBookmarks()" title="JSON 파일에서 북마크 불러오기">📂 불러오기</button>
+        <button class="btn-bm-io btn-api" id="apiSettingsBtn" onclick="openApiSettings()" title="시놀로지 서버 연결 설정">🔗 서버 설정</button>
       </div>
     </div>
     <div class="folder-chips" id="folderChips"></div>
@@ -587,6 +595,32 @@ body.dark .dark-toggle:hover {{ background: #2d2d3f; }}
     </table>
   </div>
   <div class="card-list" id="cards-bm"></div>
+</div>
+
+<!-- API 설정 모달 -->
+<div id="apiModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:min(420px,92vw);box-shadow:0 8px 32px rgba(0,0,0,.2);">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:6px;">🔗 시놀로지 서버 연결</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:18px;">api.php 를 시놀로지 Web Station에 업로드한 후 설정하세요.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;display:block;margin-bottom:4px;">API URL</label>
+        <input id="apiUrlInput" type="url" placeholder="https://xxx.synology.me/domeggook/api.php"
+          style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;display:block;margin-bottom:4px;">Secret Key</label>
+        <input id="apiKeyInput" type="password" placeholder="api.php의 SECRET_KEY 값"
+          style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+      <button onclick="closeApiSettings()"
+        style="padding:8px 18px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;background:#fff;cursor:pointer;font-family:inherit;">취소</button>
+      <button onclick="saveApiSettings()"
+        style="padding:8px 18px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">연결 저장</button>
+    </div>
+  </div>
 </div>
 
 <!-- 팝업 -->
