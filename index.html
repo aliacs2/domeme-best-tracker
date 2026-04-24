@@ -4,210 +4,123 @@
 <meta charset="UTF-8">
 <title>도매꾹 인기 랭킹 트래커</title>
 <style>
-/* 감쟈님 취향의 깔끔한 스타일 유지 */
+/* 감쟈님이 주신 스타일 그대로 유지 */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Malgun Gothic', sans-serif; background: #f3f4f6; padding: 20px; color: #111; }
 h1 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
 
-/* 날짜 및 컨트롤 바 */
-.top-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
-.card { background: #fff; border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+/* 날짜 선택바 스타일 추가 */
+.date-bar { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+.date-bar label { font-size: 11px; color: #888; font-weight: 600; }
+#dateSelect { padding: 6px 12px; border-radius: 7px; border: 1px solid #e5e7eb; font-size: 13px; outline: none; cursor: pointer; }
+
+/* ── 탭 ── */
+.tab-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.tab-btn { padding: 7px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; background: #fff; cursor: pointer; color: #555; white-space: nowrap; transition: all .12s; }
+.tab-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; font-weight: 600; }
+.tab-btn:hover:not(.active) { background: #f0f0ff; border-color: #c7d2fe; color: #4f46e5; }
+
+/* ── 컨트롤 및 테이블 스타일 (생략 없이 원본 그대로 적용 권장) ── */
+.controls { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
 .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
 .ctrl-group label { font-size: 11px; color: #888; font-weight: 600; }
-select, input { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; outline: none; font-family: inherit; }
+.ctrl-group input { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; width: 180px; font-family: inherit; outline: none; }
+.price-range { display: flex; gap: 5px; align-items: center; }
+.price-range span { font-size: 12px; color: #bbb; }
+.ctrl-group select { padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 13px; background: #fff; outline: none; cursor: pointer; }
+.btn-reset { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 12px; background: #fff; cursor: pointer; color: #555; }
 
-/* 탭 바 */
-.tab-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-.tab-btn { padding: 8px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; background: #fff; cursor: pointer; color: #555; }
-.tab-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; font-weight: 600; }
+.legend { display: flex; gap: 12px; margin-bottom: 8px; align-items: center; font-size: 12px; color: #666; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 11px; height: 11px; border-radius: 3px; }
+.dot-new { background: #fde68a; border: 1px solid #f59e0b; }
+.dot-up  { background: #bbf7d0; border: 1px solid #22c55e; }
+.count-label { font-size: 12px; color: #888; margin-bottom: 7px; }
 
-/* 테이블 */
 .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-th { padding: 10px 8px; font-size: 11px; color: #888; background: #f9fafb; border-bottom: 1px solid #e5e7eb; cursor: pointer; }
-th:hover { background: #f0f0ff; color: #4f46e5; }
+thead { background: #f9fafb; }
+th { padding: 10px 8px; font-size: 11px; color: #888; font-weight: 600; border-bottom: 1px solid #e5e7eb; white-space: nowrap; letter-spacing: .3px; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: #f0f0ff; color: #4f46e5; }
+th.asc  .sort-icon::after { content: ' ▲'; color: #4f46e5; font-size: 9px; }
+th.desc .sort-icon::after { content: ' ▼'; color: #4f46e5; font-size: 9px; }
+th:not(.asc):not(.desc) .sort-icon::after { content: ' ⇅'; color: #ccc; font-size: 9px; }
 td { padding: 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; text-align: center; }
-.thumb { width: 100px; height: 100px; object-fit: cover; border-radius: 7px; border: 1px solid #e5e7eb; }
-.title-link { color: #111; text-decoration: none; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: left; }
+
+.thumb { width: 192px; height: 192px; object-fit: cover; border-radius: 7px; border: 1px solid #e5e7eb; display: block; margin: auto; }
+.title-link { color: #111; text-decoration: none; font-size: 12px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: left; }
+.title-link:hover { color: #4f46e5; text-decoration: underline; }
 .chg-up { color: #16a34a; font-weight: 700; }
 .chg-down { color: #dc2626; font-weight: 700; }
-.badge-new { background: #fde68a; color: #92400e; padding: 2px 6px; border-radius: 5px; font-size: 11px; border: 1px solid #f59e0b; }
+.badge-new { display: inline-block; background: #fde68a; color: #92400e; padding: 2px 6px; border-radius: 5px; font-size: 11px; font-weight: 700; border: 1px solid #f59e0b; }
+.badge-biz { display: inline-block; background: #fff7ed; color: #9a3412; padding: 1px 5px; border-radius: 4px; font-size: 10px; margin-left: 4px; border: 1px solid #fed7aa; vertical-align: middle; }
+.cat-tag { display: inline-block; font-size: 10px; color: #6366f1; background: #ede9fe; border-radius: 3px; padding: 1px 5px; margin-top: 2px; }
 tr.hl-new td { background: #fffbeb; border-left: 3px solid #f59e0b; }
-tr.hl-up td { background: #f0fdf4; border-left: 3px solid #22c55e; }
-.status-msg { padding: 10px; font-size: 12px; color: #4f46e5; }
+tr.hl-up  td { background: #f0fdf4; border-left: 3px solid #22c55e; }
+
+/* ── 북마크 관련 스타일 그대로 복사 ── */
+.bm-btn { background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1; transition: transform .15s; }
+.bm-btn.on { color: #f59e0b; }
+.bm-btn.off { color: #ddd; }
+.folder-bar { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+.folder-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center; gap: 5px; }
+.chip.active { background: #4f46e5; color: #fff; }
+.popup-overlay { display: none; position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.1); }
+.popup { display: none; position: fixed; z-index: 200; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.14); width: 250px; padding: 14px; }
+.popup.open { display: block; }
 </style>
 </head>
 <body>
 
 <h1>도매꾹 인기 랭킹 트래커 🥔</h1>
 
-<div class="top-bar">
-    <div class="card ctrl-group">
-        <label>분석 날짜</label>
-        <select id="dateSelect" onchange="changeDate(this.value)">
-            <option>날짜 로딩 중...</option>
-        </select>
-    </div>
-    
-    <div class="card" style="display:flex; gap:14px;">
-        <div class="ctrl-group">
-            <label>상품명 검색</label>
-            <input type="text" id="searchInput" placeholder="검색어..." oninput="render()">
-        </div>
-        <div class="ctrl-group">
-            <label>가격 (최소~최대)</label>
-            <div style="display:flex; gap:5px; align-items:center;">
-                <input type="number" id="priceMin" placeholder="0" style="width:80px" oninput="render()">
-                <span style="font-size:12px; color:#ccc;">~</span>
-                <input type="number" id="priceMax" placeholder="99만" style="width:80px" oninput="render()">
-            </div>
-        </div>
-        <div class="ctrl-group">
-            <label>구분 필터</label>
-            <select id="bizFilter" onchange="render()">
-                <option value="">전체</option>
-                <option value="일반">일반</option>
-                <option value="사업자 전용">사업자 전용</option>
-            </select>
-        </div>
-    </div>
+<div class="date-bar">
+    <label>분석 일자 선택</label>
+    <select id="dateSelect" onchange="changeDate(this.value)"></select>
 </div>
 
 <div class="tab-bar" id="tabBar">
-    <button class="tab-btn active" onclick="switchTab('all')">전체 랭킹</button>
-    <button class="tab-btn" onclick="switchTab('cat01')">패션잡화/화장품</button>
-    <button class="tab-btn" onclick="switchTab('cat02')">의류/언더웨어</button>
-    <button class="tab-btn" onclick="switchTab('cat03')">출산/유아동/완구</button>
-    <button class="tab-btn" onclick="switchTab('cat04')">가구/생활/취미</button>
-    <button class="tab-btn" onclick="switchTab('cat05')">스포츠/건강/식품</button>
-    <button class="tab-btn" onclick="switchTab('cat06')">가전/휴대폰/산업</button>
-    <button class="tab-btn" onclick="switchTab('merged')">🗂 카테고리 합산</button>
+    <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">전체 랭킹</button>
+    <button class="tab-btn" id="tab-cat01" onclick="switchTab('cat01')">패션잡화/화장품</button>
+    <button class="tab-btn" id="tab-cat02" onclick="switchTab('cat02')">의류/언더웨어</button>
+    <button class="tab-btn" id="tab-cat03" onclick="switchTab('cat03')">출산/유아동/완구</button>
+    <button class="tab-btn" id="tab-cat04" onclick="switchTab('cat04')">가구/생활/취미</button>
+    <button class="tab-btn" id="tab-cat05" onclick="switchTab('cat05')">스포츠/건강/식품</button>
+    <button class="tab-btn" id="tab-cat06" onclick="switchTab('cat06')">가전/휴대폰/산업</button>
+    <button class="tab-btn" id="tab-merged" onclick="switchTab('merged')">🗂 카테고리 합산</button>
+    <button class="tab-btn" id="tab-bm" onclick="switchTab('bm')">🔖 북마크 <span id="bmBadge"></span></button>
 </div>
 
-<div id="statusMsg" class="status-msg">준비 중...</div>
+<div id="viewsContainer">
+    </div>
 
-<div class="table-wrap">
+<div id="view-bm" style="display:none">
+  <div class="folder-bar">
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <span style="font-weight:600;">폴더 관리</span>
+        <button onclick="promptNewFolder()" style="font-size:11px; cursor:pointer;">+ 새 폴더</button>
+    </div>
+    <div class="folder-chips" id="folderChips"></div>
+  </div>
+  <p class="count-label" id="bmCountLabel"></p>
+  <div class="table-wrap">
     <table>
-        <thead>
-            <tr>
-                <th style="width:60px">순위</th>
-                <th style="width:120px">이미지</th>
-                <th style="width:80px">변동</th>
-                <th>상품명</th>
-                <th style="width:100px">가격</th>
-                <th style="width:80px">수량</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <tr><td colspan="6" style="padding:50px; color:#ccc;">데이터를 불러오는 중입니다...</td></tr>
-        </tbody>
+      <thead><tr>
+        <th style="width:44px">북마크</th>
+        <th class="sortable" id="th-bm-rankNum" onclick="sortByBm('rankNum')">순위</th>
+        <th style="width:200px">이미지</th>
+        <th class="sortable" id="th-bm-changeNum" onclick="sortByBm('changeNum')">변동</th>
+        <th>상품명</th>
+        <th class="sortable" id="th-bm-priceNum" onclick="sortByBm('priceNum')">가격</th>
+        <th style="width:70px">수량</th>
+      </tr></thead>
+      <tbody id="bmBody"></tbody>
     </table>
+  </div>
 </div>
 
-<script>
-let ALL_DATA = {}; 
-let currentTab = 'all';
-
-async function init() {
-    updateStatus("날짜 목록을 가져오는 중...");
-    try {
-        const res = await fetch('./data/index.json');
-        if (!res.ok) throw new Error("index.json 파일을 찾을 수 없습니다.");
-        const dates = await res.json();
-        const select = document.getElementById('dateSelect');
-        select.innerHTML = dates.map(d => `<option value="${d}">${d} 데이터</option>`).join('');
-        changeDate(dates[0]);
-    } catch (e) {
-        updateStatus("에러: " + e.message);
-        console.error(e);
-    }
-}
-
-async function changeDate(date) {
-    updateStatus(`${date} 데이터를 읽어오는 중...`);
-    try {
-        const res = await fetch(`./data/${date}.json`);
-        if (!res.ok) throw new Error(`${date}.json 파일을 찾을 수 없습니다.`);
-        ALL_DATA = await res.json();
-        updateStatus(`${date} 데이터 로드 완료!`);
-        render();
-    } catch (e) {
-        updateStatus("에러: " + e.message);
-        console.error(e);
-    }
-}
-
-function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tab}'`));
-    });
-    render();
-}
-
-function updateStatus(msg) {
-    document.getElementById('statusMsg').innerText = "상태: " + msg;
-}
-
-function render() {
-    // 1. 현재 탭의 데이터 가져오기 (데이터 구조가 다를 경우 대비)
-    const list = ALL_DATA[currentTab] || [];
-    
-    // 2. 필터 값 가져오기 (에러 방지용 기본값 설정)
-    const keyword = (document.getElementById('searchInput').value || "").toLowerCase();
-    const priceMin = parseInt(document.getElementById('priceMin').value) || 0;
-    const priceMax = parseInt(document.getElementById('priceMax').value) || 99999999;
-    const bizFilter = document.getElementById('bizFilter').value;
-
-    // 3. 필터링 로직
-    const filtered = list.filter(item => {
-        const p = parseInt(item.price.toString().replace(/[^0-9]/g, '')) || 0;
-        const title = (item.title || "").toLowerCase();
-        
-        if (keyword && !title.includes(keyword)) return false;
-        if (p < priceMin || p > priceMax) return false;
-        if (bizFilter && item.biz !== bizFilter) return false;
-        return true;
-    });
-
-    // 4. 테이블 그리기
-    const tbody = document.getElementById('tableBody');
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="padding:50px; color:#bbb;">검색 조건에 맞는 상품이 없습니다.</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = filtered.map(d => {
-        let chgHtml = d.change || '-';
-        if (chgHtml === 'NEW') chgHtml = '<span class="badge-new">NEW</span>';
-        else if (chgHtml.includes('▲')) chgHtml = `<span class="chg-up">${chgHtml}</span>`;
-        else if (chgHtml.includes('▼')) chgHtml = `<span class="chg-down">${chgHtml}</span>`;
-
-        // 하이라이트 조건
-        const isNew = d.change === 'NEW';
-        const isUp3 = d.change && d.change.includes('▲') && parseInt(d.change.replace(/[^0-9]/g,'')) >= 3;
-        const hlClass = isNew ? 'hl-new' : isUp3 ? 'hl-up' : '';
-
-        return `<tr class="${hlClass}">
-            <td><span style="font-weight:bold; font-size:15px;">${d.rank}</span></td>
-            <td><img src="${d.img}" class="thumb" loading="lazy" onerror="this.src='https://via.placeholder.com/100?text=No+Img'"></td>
-            <td>${chgHtml}</td>
-            <td>
-                <a href="${d.url}" target="_blank" class="title-link">${d.title}</a>
-                <div style="display:flex; gap:4px; margin-top:5px;">
-                    ${d.biz === '사업자 전용' ? '<span style="font-size:10px; color:#9a3412; background:#fff7ed; border:1px solid #fed7aa; padding:1px 4px; border-radius:4px;">사업자</span>' : ''}
-                    ${d.cat_label ? `<span style="font-size:10px; color:#6366f1; background:#ede9fe; padding:1px 5px; border-radius:3px;">${d.cat_label}</span>` : ''}
-                    ${d.all_rank ? `<span style="font-size:10px; color:#888;">(전체 ${d.all_rank}위)</span>` : ''}
-                </div>
-            </td>
-            <td style="text-align:right; font-weight:bold; color:#4f46e5;">${parseInt(d.price).toLocaleString()}원</td>
-            <td style="color:#999; font-size:11px;">최소 ${d.qty}</td>
-        </tr>`;
-    }).join('');
-}
-
-// 시작!
-init();
-</script>
-</body>
-</html>
+<div class="popup-overlay" id="popOverlay" onclick="closePopup()"></div>
+<div class="popup" id="popup">
+  <h3 style="font
