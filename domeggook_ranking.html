@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>도매꾹 인기 랭킹</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -161,6 +162,91 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 14px; color: #555; }
+
+/* ── 카드 레이아웃 (모바일 전용) ── */
+.card-list { display: none; flex-direction: column; gap: 10px; }
+.card {
+  background: #fff; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  display: flex; gap: 0;
+}
+.card.hl-new { border-left: 4px solid #f59e0b; background: #fffbeb; }
+.card.hl-up  { border-left: 4px solid #22c55e; background: #f0fdf4; }
+.card-img-wrap {
+  flex-shrink: 0; width: 110px; position: relative;
+}
+.card-img-wrap img {
+  width: 110px; height: 110px; object-fit: cover; display: block;
+}
+.card-img-wrap .card-rank {
+  position: absolute; top: 6px; left: 6px;
+  background: rgba(0,0,0,.65); color: #fff;
+  font-size: 13px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; line-height: 1.4;
+}
+.card-img-wrap .card-bm {
+  position: absolute; top: 4px; right: 4px;
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; line-height: 1; padding: 2px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+}
+.card-img-wrap .card-bm.on  { color: #f59e0b; }
+.card-img-wrap .card-bm.off { color: rgba(255,255,255,.85); }
+.card-body {
+  flex: 1; padding: 10px 12px; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.card-title {
+  font-size: 13px; line-height: 1.5; color: #111;
+  text-decoration: none;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 8px;
+}
+.card-title:hover { color: #4f46e5; }
+.card-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.card-price {
+  font-size: 15px; font-weight: 700; color: #111;
+}
+.card-change {
+  font-size: 12px; font-weight: 700;
+}
+.card-qty {
+  font-size: 11px; color: #aaa;
+}
+.card-tags {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px;
+}
+
+/* ── 모바일 반응형 ── */
+@media (max-width: 640px) {
+  body { padding: 12px 10px; }
+  h1 { font-size: 17px; }
+
+  /* 날짜바 */
+  .date-bar { padding: 10px 12px; gap: 8px; }
+  .date-select { min-width: 0; flex: 1; font-size: 13px; }
+  .date-count { display: none; }
+
+  /* 탭 */
+  .tab-bar { gap: 3px; }
+  .tab-btn { padding: 6px 10px; font-size: 11px; }
+
+  /* 컨트롤 */
+  .controls { padding: 10px 12px; gap: 10px; }
+  .ctrl-group input[type=text] { width: 100%; }
+  .ctrl-group input[type=number] { width: 80px; }
+
+  /* 테이블 숨기고 카드 표시 */
+  .table-wrap { display: none; }
+  .card-list { display: flex; }
+
+  /* 북마크 폴더바 */
+  .folder-bar { padding: 10px 12px; }
+  .btn-bm-io { padding: 4px 8px; font-size: 11px; }
+}
 </style>
 </head>
 <body>
@@ -250,6 +336,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-all"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-all"></div>
 </div>
 
 <div id="view-cat01" style="display:none">
@@ -306,6 +393,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat01"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat01"></div>
 </div>
 
 <div id="view-cat02" style="display:none">
@@ -362,6 +450,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat02"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat02"></div>
 </div>
 
 <div id="view-cat03" style="display:none">
@@ -418,6 +507,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat03"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat03"></div>
 </div>
 
 <div id="view-cat04" style="display:none">
@@ -474,6 +564,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat04"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat04"></div>
 </div>
 
 <div id="view-cat05" style="display:none">
@@ -530,6 +621,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat05"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat05"></div>
 </div>
 
 <div id="view-cat06" style="display:none">
@@ -586,6 +678,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-cat06"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-cat06"></div>
 </div>
 
 
@@ -643,6 +736,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="body-merged"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-merged"></div>
 </div>
 
 <!-- 북마크 뷰 -->
@@ -673,6 +767,7 @@ tr.hl-up  td:first-child { border-left: 3px solid #22c55e; }
       <tbody id="bmBody"></tbody>
     </table>
   </div>
+  <div class="card-list" id="cards-bm"></div>
 </div>
 
 <!-- 팝업 -->
@@ -1153,6 +1248,40 @@ function renderBmView() {
       <td class="col-qty"><span class="qty-val">최소 ${d.qty}개</span></td>
     </tr>`;
   }).join('');
+
+  // 카드 레이아웃 (모바일)
+  const cardList = document.getElementById('cards-bm');
+  if (cardList) {
+    cardList.innerHTML = list.map(({d, catKey, fid}) => {
+      const fname    = fmap[fid] || '';
+      const hl       = d.isNew ? 'hl-new' : d.isHotUp ? 'hl-up' : '';
+      const price    = d.priceNum > 0 ? d.priceNum.toLocaleString() + '원' : '-';
+      const chg      = chgHtml(d);
+      const biz      = d.biz === '사업자 전용' ? '<span class="badge-biz">사업자</span>' : '';
+      const newBadge = d.isNew ? '<span class="badge-new">NEW</span>' : '';
+      const catLabel = CATEGORIES.find(c=>c.key===catKey)?.label || '';
+      const idx      = DATA[catKey].indexOf(d);
+      const imgUrl   = d.img || '';
+      return `<div class="card ${hl}">
+        <div class="card-img-wrap">
+          ${imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span class="card-rank">${d.rank}위</span>
+          <button class="card-bm on" onclick="openPopup(event,'${catKey}',${idx})">★</button>
+        </div>
+        <div class="card-body">
+          <a href="${d.url}" target="_blank" class="card-title">${d.title}</a>
+          <div>
+            <div class="card-meta">
+              <span class="card-price">${price}</span>
+              <span class="card-change">${chg}</span>
+              <span class="card-qty">최소 ${d.qty}개</span>
+            </div>
+            <div class="card-tags">${newBadge}${biz}<span class="cat-tag">${catLabel}</span>${fname ? `<span class="bm-fname">${fname}</span>` : ''}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function updateBmBadge() {
@@ -1307,6 +1436,44 @@ function render(catKey) {
       <td class="col-qty"><span class="qty-val">최소 ${d.qty}개</span></td>
     </tr>`;
   }).join('');
+
+  // 카드 레이아웃 (모바일)
+  const cardList = document.getElementById(`cards-${catKey}`);
+  if (cardList) {
+    cardList.innerHTML = list.map(d => {
+      const idx      = DATA[catKey].indexOf(d);
+      const key      = itemKey(d);
+      const isMarked = !!bm[key];
+      const hl       = d.isNew ? 'hl-new' : d.isHotUp ? 'hl-up' : '';
+      const price    = d.priceNum > 0 ? d.priceNum.toLocaleString() + '원' : '-';
+      const chg      = chgHtml(d);
+      const biz      = d.biz === '사업자 전용' ? '<span class="badge-biz">사업자</span>' : '';
+      const catTag   = d.cat_label ? `<span class="cat-tag">${d.cat_label}</span>` : '';
+      const newBadge = d.isNew ? '<span class="badge-new">NEW</span>' : '';
+      const imgUrl   = d.img || '';
+      return `<div class="card ${hl}">
+        <div class="card-img-wrap">
+          ${imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span class="card-rank">${d.rank}위</span>
+          <button class="card-bm ${isMarked?'on':'off'}"
+            onclick="openPopup(event,'${catKey}',${idx})">
+            ${isMarked ? '★' : '☆'}
+          </button>
+        </div>
+        <div class="card-body">
+          <a href="${d.url}" target="_blank" class="card-title">${d.title}</a>
+          <div>
+            <div class="card-meta">
+              <span class="card-price">${price}</span>
+              <span class="card-change">${chg}</span>
+              <span class="card-qty">최소 ${d.qty}개</span>
+            </div>
+            <div class="card-tags">${newBadge}${biz}${catTag}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function renderCurrentTab() {
